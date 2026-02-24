@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 df = pd.read_csv("datos_cauca.csv")
 df_original = df.copy()
@@ -94,4 +95,109 @@ plt.title("Dispersión del puntaje global - Cauca")
 plt.suptitle("")
 plt.show()
 
-########
+############   PREGUNTA 2 - EDUCACIÓN PADRES
+# Limpiar categorías no válidas
+categorias_excluir = ["No Aplica", "No sabe", "Ninguno"]
+
+df_educ = df[
+    (~df["fami_educacionpadre"].isin(categorias_excluir)) &
+    (~df["fami_educacionmadre"].isin(categorias_excluir))].copy()
+
+# PROMEDIO SEGÚN EDUCACIÓN PADRE
+df_padre = (
+    df_educ
+    .groupby("fami_educacionpadre")["punt_global"]
+    .agg(["count", "mean"])
+    .reset_index()
+    .rename(columns={
+        "count": "n_estudiantes",
+        "mean": "promedio_punt_global"
+    }).sort_values("promedio_punt_global"))
+
+df_padre["promedio_punt_global"] = df_padre["promedio_punt_global"].round(2)
+
+print("\nPromedio según educación del padre")
+print(df_padre)
+
+# PROMEDIO SEGÚN EDUCACIÓN MADRE
+df_madre = (
+    df_educ
+    .groupby("fami_educacionmadre")["punt_global"]
+    .agg(["count", "mean"])
+    .reset_index()
+    .rename(columns={
+        "count": "n_estudiantes",
+        "mean": "promedio_punt_global"
+    }).sort_values("promedio_punt_global"))
+
+df_madre["promedio_punt_global"] = df_madre["promedio_punt_global"].round(2)
+
+print("\nPromedio según educación de la madre")
+print(df_madre)
+
+# BRECHA ENTRE EXTREMOS
+brecha_padre = df_padre["promedio_punt_global"].max() - df_padre["promedio_punt_global"].min()
+brecha_madre = df_madre["promedio_punt_global"].max() - df_madre["promedio_punt_global"].min()
+
+print("\nBrecha educación padre:", round(brecha_padre,2))
+print("Brecha educación madre:", round(brecha_madre,2))
+
+# GRÁFICO DE BARRAS COMBINADO
+niveles_comunes = sorted(
+    list(
+        set(df_padre["fami_educacionpadre"])
+        .intersection(set(df_madre["fami_educacionmadre"]))))
+
+padre_plot = df_padre[
+    df_padre["fami_educacionpadre"].isin(niveles_comunes)
+].set_index("fami_educacionpadre").loc[niveles_comunes]
+
+madre_plot = df_madre[
+    df_madre["fami_educacionmadre"].isin(niveles_comunes)
+].set_index("fami_educacionmadre").loc[niveles_comunes]
+
+x = np.arange(len(niveles_comunes))
+width = 0.35
+
+plt.figure(figsize=(12,6))
+
+plt.bar(x - width/2, padre_plot["promedio_punt_global"],
+        width, label="Padre", color="blue")
+
+plt.bar(x + width/2, madre_plot["promedio_punt_global"],
+        width, label="Madre", color="orange")
+
+plt.xticks(x, niveles_comunes, rotation=45, ha='right')
+plt.ylabel("Puntaje Global Promedio")
+plt.title("Puntaje promedio según nivel educativo de los padres")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# MATRIZ CRUZADA PADRE × MADRE
+df_matriz = (
+    df_educ
+    .pivot_table(
+        values="punt_global",
+        index="fami_educacionpadre",
+        columns="fami_educacionmadre",
+        aggfunc="mean").round(2))
+
+print("\nMatriz Padre x Madre (Promedios)")
+print(df_matriz)
+# HEATMAP PADRE × MADRE
+plt.figure(figsize=(10,8))
+plt.imshow(df_matriz, aspect='auto')
+plt.colorbar(label="Puntaje Global Promedio")
+plt.xticks(
+    np.arange(len(df_matriz.columns)),
+    df_matriz.columns,
+    rotation=45,
+    ha='right')
+plt.yticks(
+    np.arange(len(df_matriz.index)),
+    df_matriz.index)
+plt.title("Puntaje promedio según combinación educativa Padre × Madre")
+
+plt.tight_layout()
+plt.show()
