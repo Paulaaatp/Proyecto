@@ -95,7 +95,7 @@ plt.title("Dispersión del puntaje global - Cauca")
 plt.suptitle("")
 plt.show()
 
-############   PREGUNTA 2 - EDUCACIÓN PADRES
+######## PREGUNTA 2 - EDUCACIÓN PADRES
 # Limpiar categorías no válidas
 categorias_excluir = ["No Aplica", "No sabe", "Ninguno"]
 
@@ -142,11 +142,23 @@ brecha_madre = df_madre["promedio_punt_global"].max() - df_madre["promedio_punt_
 print("\nBrecha educación padre:", round(brecha_padre,2))
 print("Brecha educación madre:", round(brecha_madre,2))
 
+# ORDEN EDUCATIVO PERSONALIZADO
+orden_educativo = [
+    "Primaria incompleta",
+    "Primaria completa",
+    "Secundaria (Bachillerato) incompleta",
+    "Secundaria (Bachillerato) completa",
+    "Técnica o tecnológica incompleta",
+    "Técnica o tecnológica completa",
+    "Educación profesional incompleta",
+    "Educación profesional completa",
+    "Postgrado"]
+
 # GRÁFICO DE BARRAS COMBINADO
-niveles_comunes = sorted(
-    list(
-        set(df_padre["fami_educacionpadre"])
-        .intersection(set(df_madre["fami_educacionmadre"]))))
+niveles_comunes = [
+    nivel for nivel in orden_educativo
+    if nivel in df_padre["fami_educacionpadre"].values
+    and nivel in df_madre["fami_educacionmadre"].values]
 
 padre_plot = df_padre[
     df_padre["fami_educacionpadre"].isin(niveles_comunes)
