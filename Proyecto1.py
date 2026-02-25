@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 df = pd.read_csv("datos_cauca.csv")
 df_original = df.copy()
@@ -96,6 +97,27 @@ plt.suptitle("")
 plt.show()
 
 ######## PREGUNTA 2 - EDUCACIÓN PADRES
+# 1. entender como se distribuye el puntaje global según el nivel educativo de los padres
+print("Estadísticas descriptivas del puntaje global:")
+print(df["punt_global"].describe())
+
+print("\nAsimetría:", round(df["punt_global"].skew(), 2))
+print("Curtosis:", round(df["punt_global"].kurt(), 2))
+
+#Histograma del puntaje global
+plt.figure(figsize=(8,5))
+plt.hist(df["punt_global"], bins=30)
+plt.title("Distribución del Puntaje Global")
+plt.xlabel("Puntaje Global")
+plt.ylabel("Frecuencia")
+plt.show()
+
+# diagrama de violín
+plt.figure(figsize=(6,4))
+sns.violinplot(x=df["punt_global"])
+plt.title("Diagrama de violín del Puntaje Global")
+plt.show()
+
 # Limpiar categorías no válidas
 categorias_excluir = ["No Aplica", "No sabe", "Ninguno"]
 
