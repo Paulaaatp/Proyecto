@@ -7,6 +7,12 @@ df = pd.read_csv("datos_cauca.csv")
 df_original = df.copy()
 df.columns = df.columns.str.lower().str.strip()
 
+total = len(df)
+print("Total datos iniciales sin modificación:", total)
+
+#Solo permitir los que tienen consentimiento
+df = df[df["estu_estadoinvestigacion"] == "PUBLICAR"]
+
 # Eliminar faltantes y duplicados
 df = df.drop_duplicates()
 df = df.dropna(subset=[
