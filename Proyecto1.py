@@ -17,6 +17,9 @@ df = df.dropna(subset=[
     "punt_lectura_critica"
 ])
 
+#Arrego estrato
+df["fami_estratovivienda"] = df["fami_estratovivienda"].str.extract(r"(\d)").astype(float)
+
 # Calcular puntaje de icfes
 df["punt_global"] = df["punt_global"].fillna(
     ((df[
@@ -78,7 +81,6 @@ desigualdad = desigualdad.sort_values("desviacion", ascending=False)
 
 print(desigualdad)
 
-print(desigualdad[desigualdad["cantidad"] == 1])
 
 plt.figure()
 plt.bar(desigualdad["estu_mcpio_reside"], desigualdad["desviacion"])
@@ -95,6 +97,93 @@ plt.xticks(rotation=45)
 plt.title("Dispersión del puntaje global - Cauca")
 plt.suptitle("")
 plt.show()
+
+#Calcular coeficiente de variación y usarlo en gráficas
+
+desigualdad["coef_variacion"] = (
+    desigualdad["desviacion"] / desigualdad["promedio"]
+)
+
+top_desigualdad = desigualdad.sort_values(
+    "desviacion", ascending=False)
+top10 = top_desigualdad.head(10)
+print(top10)
+top_coef = desigualdad.sort_values(
+    "coef_variacion", ascending=False)
+top10_coef = top_coef.head(10)
+print(top10_coef)
+
+top_desigualdad = desigualdad.sort_values(
+    "coef_variacion", ascending=False)
+top10 = top_desigualdad.head(10)
+municipios_top = top10["estu_mcpio_reside"]
+
+plt.figure()
+df[df["estu_mcpio_reside"].isin(municipios_top)] \
+    .boxplot(column="punt_global", by="estu_mcpio_reside")
+plt.xticks(rotation=45)
+plt.suptitle("")
+plt.title("Distribución del puntaje en municipios con mayor coeficiente de variación de dispersión")
+plt.show()
+
+colores = ["darkred"] + ["lightcoral"]*(len(top10)-1)
+
+plt.figure()
+plt.bar(top10["estu_mcpio_reside"],
+        top10["coef_variacion"],
+        color=colores)
+
+plt.xticks(rotation=45)
+plt.xlabel("Municipio")
+plt.ylabel("Coeficiente de variación")
+plt.title("Top 10 municipios con mayor desigualdad interna")
+plt.show()
+
+
+plt.figure()
+plt.scatter(desigualdad["promedio"],
+            desigualdad["coef_variacion"])
+plt.xlabel("Promedio municipal")
+plt.ylabel("Coeficiente de variación")
+plt.title("Relación entre desempeño promedio y desigualdad interna")
+plt.show()
+
+#Posibles relaciones con el coeficiente de variación
+hetero_estrato = (
+    df.groupby("estu_mcpio_reside")["fami_estratovivienda"]
+      .std()
+      .reset_index(name="desv_estrato")
+)
+desigualdad = desigualdad.merge(hetero_estrato,
+                                on="estu_mcpio_reside",
+                                how="left")
+
+prop_rural = (
+    df.groupby("estu_mcpio_reside")
+      .apply(lambda x: (x["cole_area_ubicacion"] == "RURAL").mean())
+      .reset_index(name="prop_rural")
+)
+desigualdad = desigualdad.merge(prop_rural,
+                                on="estu_mcpio_reside",
+                                how="left")
+
+import statsmodels.api as sm
+
+variables = ["promedio", "cantidad", "desv_estrato", "prop_rural"]
+
+for var in variables:
+    X = sm.add_constant(desigualdad[[var]])
+    y = desigualdad["coef_variacion"]
+    
+    modelo = sm.OLS(y, X).fit()
+    
+    print(f"\nModelo: coef_variacion ~ {var}")
+    print("R²:", round(modelo.rsquared, 4))
+    print("p-value:", round(modelo.pvalues[var], 4))
+
+
+################### FIN PREGUNTA 1
+
 
 ######## PREGUNTA 2 - EDUCACIÓN PADRES
 # 1. entender como se distribuye el puntaje global según el nivel educativo de los padres
