@@ -446,21 +446,26 @@ plt.ylabel("% en nivel bajo")
 plt.xticks(rotation=30)
 plt.show()
 
-##Posesión de bienes
+###Posesión de bienes
 cols_bienes = ["carro", "internet", "pc", "lavadora"]
-df_p3["indice_bienes"] = df_p3[cols_bienes].sum(axis=1)
+df_p3[cols_bienes].isna().all(axis=1).sum() #estudiantes que no reportan nada
+df_p3["indice_bienes"] = df_p3[cols_bienes].sum(axis=1, min_count=1)#no muestra filas NaN
 df_p3["indice_bienes"].value_counts().sort_index()
 
-pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")
+tabla_bienes =pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")*100
 
-df_p3.groupby("indice_bienes")["es_bajo"].mean()
-df_p3["categoria_bienes"] = pd.cut(
-    df_p3["indice_bienes"],
-    bins=[-1,1,3,4],
-    labels=["Bajo acceso", "Medio acceso", "Alto acceso"]
-)
-df_p3["categoria_bienes"] = pd.cut(
-    df_p3["indice_bienes"],
-    bins=[-1,1,3,4],
-    labels=["Bajo acceso", "Medio acceso", "Alto acceso"]
-)
+#Graficar
+tabla_bienes.plot(kind="bar", stacked=True)
+
+tabla_bienes.index = [
+    "Sin bienes",
+    "1 bien",
+    "2 bienes",
+    "3 bienes",
+    "4 bienes"]
+
+plt.ylabel("Porcentaje (%)")
+plt.xlabel("Cantidad de bienes del hogar")
+plt.title("Proporción de estudiantes en nivel bajo según bienes")
+plt.legend(["No es bajo", "Es bajo"])
+plt.show()
