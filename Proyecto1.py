@@ -235,3 +235,61 @@ plt.title("Puntaje promedio según combinación educativa Padre × Madre")
 
 plt.tight_layout()
 plt.show()
+
+########### PREGUNTA 3 - PERFIL SOCIODEMOGRAFICO
+#Variable binaria - pertenencia al cuartil bajo
+df["es_bajo"] = (df["nivel_global"] == "Bajo").astype(int)
+
+#Crear df con las variables de interés
+df_p3 = df[["cole_area_ubicacion","estu_privado_libertad", "fami_cuartoshogar", 
+            "fami_estratovivienda", "fami_personashogar", 
+            "fami_tieneautomovil", "fami_tienecomputador", 
+            "fami_tieneinternet", "fami_tienelavadora" ,"es_bajo"]]
+
+#Cambiar el nombre de los headers 
+df_p3.rename(columns={
+    "cole_area_ubicacion": "zona",
+    "estu_privado_libertad": "privado",
+    "fami_cuartoshogar": "cuartos",
+    "fami_estratovivienda": "estrato",
+    "fami_personashogar": "personas",
+    "fami_tieneautomovil": "carro",
+    "fami_tienecomputador": "pc",
+    "fami_tieneinternet": "internet",
+    "fami_tienelavadora": "lavadora",
+}, inplace=True)
+
+# Convertir a número o a variables binarias 
+    #Revisar los valores que entran a cada variable y cambiarlo si es necesario
+df["cole_area_ubicacion"].unique()#se deja así 
+
+df["estu_privado_libertad"].unique()
+df_p3["privado"] = df_p3["privado"].map({"S": 1,"N": 0})
+
+df["fami_cuartoshogar"].unique() #variables dificiles
+
+df["fami_estratovivienda"].unique()
+df_p3["estrato"] = df_p3["estrato"].map({"Estrato 1":1,
+                                         "Estrato 2":2,
+                                         "Estrato 3":3,
+                                         "Estrato 4":4,
+                                         "Estrato 5":5,
+                                         "Estrato 6":6})
+
+df["fami_personashogar"].unique() #variables dificiles
+
+df["fami_tieneautomovil"].unique()
+df_p3["carro"] = df_p3["carro"].map({"Si": 1,"No": 0}) 
+
+df["fami_tienecomputador"].unique()
+df_p3["pc"] = df_p3["pc"].map({"Si": 1,"No": 0})
+
+df["fami_tieneinternet"].unique()
+df_p3["internet"] = df_p3["internet"].map({"Si": 1,"No": 0})
+
+df["fami_tienelavadora"].unique()
+df_p3["lavadora"] = df_p3["lavadora"].map({"Si": 1,"No": 0})
+
+#Visualización   
+pd.set_option("display.max_columns", None) #visualizar todas las columnas        
+print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
