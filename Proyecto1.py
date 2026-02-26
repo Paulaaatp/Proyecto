@@ -419,19 +419,29 @@ plt.ylabel("Porcentaje (%)")
 plt.legend()
 plt.show()
 
-#Mapa de calor: estrato, zona y nivel bajo
-tabla_heat = (
+#Grafica: estrato, zona y nivel bajo
+tabla_comp = (
     pd.crosstab(
         [df_p3["estrato_grupo"], df_p3["zona"]],
         df_p3["es_bajo"],
         normalize="index") * 100).round(2)
 
-tabla_heat.columns = ["No bajo", "Bajo"]
+tabla_comp.columns = ["No bajo", "Bajo"]
+tabla_comp_bajo = tabla_comp["Bajo"].unstack()
 
-#Graficar
-plt.figure()
-sns.heatmap(tabla_heat, annot=True)  
+
+#Alernativas 
+#Grafico de lineas 
+tabla_comp_bajo.plot(marker="o")
 plt.title("Proporción de nivel bajo por Estrato y Zona")
-plt.ylabel("Grupo de estrato")
-plt.xlabel("Zona")
+plt.ylabel("% en nivel bajo")
+plt.xlabel("Grupo de estrato")
 plt.show()
+
+#Grafico de barras agrupadas
+tabla_comp_bajo.plot(kind="bar")
+plt.title("Proporción de nivel bajo por Estrato y Zona")
+plt.ylabel("% en nivel bajo")
+plt.xticks(rotation=30)
+plt.show()
+
