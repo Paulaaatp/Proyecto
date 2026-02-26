@@ -237,6 +237,7 @@ plt.tight_layout()
 plt.show()
 
 ########### PREGUNTA 3 - PERFIL SOCIODEMOGRAFICO
+#LIMPIEZA Y ORGANIZACION DE VARIABLES
 #Variable binaria - pertenencia al cuartil bajo
 df["es_bajo"] = (df["nivel_global"] == "Bajo").astype(int)
 
@@ -292,4 +293,90 @@ df_p3["lavadora"] = df_p3["lavadora"].map({"Si": 1,"No": 0})
 
 #Visualización   
 pd.set_option("display.max_columns", None) #visualizar todas las columnas        
-print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
+#print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
+
+#ANALISIS ESTADISTICO POR VARIABLE
+#Estrato
+#Frecuencias y porcentajes
+freq_estrato = df_p3["estrato"].value_counts(dropna=False).sort_index()
+pct_estrato = df_p3["estrato"].value_counts(normalize=True, dropna=False).sort_index()
+
+resumen_estrato = (pd.DataFrame({"N": freq_estrato, "Porcentaje": (pct_estrato*100).round(2)}))
+print(resumen_estrato) # Hay una gran concentración en estratos bajos y muchos NaN.
+
+# ~Revisar si los NaN son aleatorios para evaluar si se pueden eliminar.
+# Proporción de nivel bajo en quienes NO reportan estrato
+prop_nan = df_p3[df_p3["estrato"].isna()]["es_bajo"].mean() #%muy alto, no son aleatorios.
+# Proporción de nivel bajo en quienes sí reportan estrato
+prop_no_nan = df_p3[~df_p3["estrato"].isna()]["es_bajo"].mean()
+print(prop_nan, prop_no_nan) 
+
+#Agrupar estratos en categorías más amplias
+df_p3["estrato_grupo"] = df_p3["estrato"].fillna(0)
+
+df_p3["estrato_grupo"] = df_p3["estrato_grupo"].map({
+    0: "No reporta",
+    1: "Estrato 1",
+    2: "Estrato 2",
+    3: "Estrato 3+",
+    4: "Estrato 3+",
+    5: "Estrato 3+",
+    6: "Estrato 3+"})
+
+freq_estrato_grupo = df_p3["estrato_grupo"].value_counts(dropna=False).sort_index()
+pct_estrato_grupo = df_p3["estrato_grupo"].value_counts(normalize=True, dropna=False).sort_index()
+
+resumen_estrato_grupo = (pd.DataFrame({"N": freq_estrato_grupo, "Porcentaje": (pct_estrato_grupo*100).round(2)}))
+print(resumen_estrato_grupo) # La mayoría de los estudiantes pertenecen a estratos bajos, con una gran proporción que no reporta.
+
+#Graficar
+orden = ["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"] #asegurar orden
+resumen_estrato_grupo = resumen_estrato_grupo.reindex(orden)
+
+plt.figure()
+plt.bar(resumen_estrato_grupo.index, resumen_estrato_grupo["Porcentaje"])
+plt.title("Distribución de estudiantes por grupo de estrato")
+plt.xlabel("Grupo de estrato")
+plt.ylabel("Porcentaje (%)")
+plt.xticks(rotation=30)
+plt.show()
+
+#Hacer comparación con estratos y nivel bajo
+tabla_grupo = (
+    df_p3.groupby("estrato_grupo")
+         .agg(
+             N=("es_bajo","size"),
+             prop_bajo=("es_bajo","mean")
+         )
+         .assign(pct_bajo=lambda x: (x["prop_bajo"]*100).round(2))
+         .sort_values("pct_bajo", ascending=False))
+
+#Graficar
+plt.figure()
+plt.bar(tabla_grupo.index, tabla_grupo["pct_bajo"])
+plt.title("Proporción de nivel bajo por grupo de estrato")
+plt.xlabel("Grupo de estrato")
+plt.ylabel("% en nivel bajo")
+plt.xticks(rotation=30)
+plt.show()
+
+#Barras apiladas para mejor comprensión
+tabla_stack = (pd.crosstab(df_p3["estrato_grupo"], 
+                df_p3["es_bajo"], 
+                normalize="index"))
+
+tabla_stack = (tabla_stack * 100).round(2)
+
+#Graficar 
+tabla_stack.columns = ["No bajo", "Bajo"]
+tabla_stack = tabla_stack.reindex(["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"])
+
+plt.figure()
+plt.bar(tabla_stack.index, tabla_stack["No bajo"], label="No bajo")
+plt.bar(tabla_stack.index, tabla_stack["Bajo"], bottom=tabla_stack["No bajo"], label="Bajo")
+plt.title("Composición de nivel global por grupo de estrato")
+plt.xlabel("Grupo de estrato")
+plt.ylabel("Porcentaje (%)")
+plt.xticks(rotation=30)
+plt.legend()
+plt.show()
