@@ -385,12 +385,7 @@ total =df_p3["privado"].sum() #nadie es privado de su libertad
 df["fami_cuartoshogar"].unique() #variables dificiles
 
 df["fami_estratovivienda"].unique()
-df_p3["estrato"] = df_p3["estrato"].map({"Estrato 1":1,
-                                         "Estrato 2":2,
-                                         "Estrato 3":3,
-                                         "Estrato 4":4,
-                                         "Estrato 5":5,
-                                         "Estrato 6":6})
+df_p3["estrato"] = df_p3["estrato"].fillna(0) 
 
 df["fami_personashogar"].unique() #variables dificiles
 
@@ -408,7 +403,7 @@ df_p3["lavadora"] = df_p3["lavadora"].map({"Si": 1,"No": 0})
 
 #Visualización   
 pd.set_option("display.max_columns", None) #visualizar todas las columnas        
-#print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
+print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
 
 #ANALISIS ESTADISTICO POR VARIABLE
 ###Estrato
@@ -446,9 +441,10 @@ resumen_estrato_grupo = (pd.DataFrame({"N": freq_estrato_grupo, "Porcentaje": (p
 #Graficar
 orden = ["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"] #asegurar orden
 resumen_estrato_grupo = resumen_estrato_grupo.reindex(orden)
+print(resumen_estrato_grupo)
 
 plt.figure()
-plt.bar(resumen_estrato_grupo.index, resumen_estrato_grupo["Porcentaje"])
+plt.bar(resumen_estrato_grupo.index, resumen_estrato_grupo["Porcentaje"],color="indigo")
 plt.title("Distribución de estudiantes por grupo de estrato")
 plt.xlabel("Grupo de estrato")
 plt.ylabel("Porcentaje (%)")
@@ -467,7 +463,7 @@ tabla_grupo = (
 
 #Graficar
 plt.figure()
-plt.bar(tabla_grupo.index, tabla_grupo["pct_bajo"])
+plt.bar(tabla_grupo.index, tabla_grupo["pct_bajo"], color="darkturquoise")
 plt.title("Proporción de nivel bajo por grupo de estrato")
 plt.xlabel("Grupo de estrato")
 plt.ylabel("% en nivel bajo")
@@ -486,8 +482,8 @@ tabla_stack.columns = ["No bajo", "Bajo"]
 tabla_stack = tabla_stack.reindex(["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"])
 
 plt.figure()
-plt.bar(tabla_stack.index, tabla_stack["No bajo"], label="No bajo")
-plt.bar(tabla_stack.index, tabla_stack["Bajo"], bottom=tabla_stack["No bajo"], label="Bajo")
+plt.bar(tabla_stack.index, tabla_stack["No bajo"], label="No bajo", color="thistle")
+plt.bar(tabla_stack.index, tabla_stack["Bajo"], bottom=tabla_stack["No bajo"], label="Bajo", color="indigo")
 plt.title("Composición de nivel global por grupo de estrato")
 plt.xlabel("Grupo de estrato")
 plt.ylabel("Porcentaje (%)")
@@ -521,13 +517,8 @@ tabla_stack_zona.columns = ["No bajo", "Bajo"]
 
 #Graficar 
 plt.figure()
-plt.bar(tabla_stack_zona.index, 
-        tabla_stack_zona["No bajo"], 
-        label="No bajo")
-plt.bar(tabla_stack_zona.index, 
-        tabla_stack_zona["Bajo"], 
-        bottom=tabla_stack_zona["No bajo"], 
-        label="Bajo")
+plt.bar(tabla_stack_zona.index, tabla_stack_zona["No bajo"], label="No bajo", color="thistle")
+plt.bar(tabla_stack_zona.index, tabla_stack_zona["Bajo"], bottom=tabla_stack_zona["No bajo"], label="Bajo", color="indigo")
 plt.title("Composición del nivel global por zona")
 plt.xlabel("Zona")
 plt.ylabel("Porcentaje (%)")
@@ -546,14 +537,14 @@ tabla_comp_bajo = tabla_comp["Bajo"].unstack()
 
 #Alernativas 
 #Grafico de lineas 
-tabla_comp_bajo.plot(marker="o")
+tabla_comp_bajo.plot(marker="o", color=["indigo", "deepskyblue"])
 plt.title("Proporción de nivel bajo por Estrato y Zona")
 plt.ylabel("% en nivel bajo")
 plt.xlabel("Grupo de estrato")
 plt.show()
 
 #Grafico de barras agrupadas
-tabla_comp_bajo.plot(kind="bar")
+tabla_comp_bajo.plot(kind="bar", color=["indigo", "deepskyblue"])
 plt.title("Proporción de nivel bajo por Estrato y Zona")
 plt.ylabel("% en nivel bajo")
 plt.xticks(rotation=30)
@@ -568,7 +559,7 @@ df_p3["indice_bienes"].value_counts().sort_index()
 tabla_bienes =pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")*100
 
 #Graficar
-tabla_bienes.plot(kind="bar", stacked=True)
+tabla_bienes.plot(kind="bar", stacked=True, color=["thistle", "indigo"])
 
 tabla_bienes.index = [
     "Sin bienes",
