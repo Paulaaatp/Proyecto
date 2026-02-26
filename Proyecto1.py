@@ -573,3 +573,33 @@ plt.xlabel("Cantidad de bienes del hogar")
 plt.title("Proporción de estudiantes en nivel bajo según bienes")
 plt.legend(["No es bajo", "Es bajo"])
 plt.show()
+
+#SINTESIS 
+#Tabla comparativa de brechas
+brecha_estrato = (df_p3.groupby("estrato_grupo")["es_bajo"].mean().mul(100))
+
+brecha_estrato_val = brecha_estrato.max() - brecha_estrato.min()
+
+brecha_zona = (df_p3.groupby("zona")["es_bajo"].mean().mul(100))
+
+brecha_zona_val = brecha_zona.max() - brecha_zona.min()
+
+brecha_bienes = (df_p3.groupby("indice_bienes")["es_bajo"].mean().mul(100))
+
+brecha_bienes_val = brecha_bienes.max() - brecha_bienes.min()
+
+resumen_brechas = pd.DataFrame({
+    "Dimensión": ["Estrato", "Zona", "Bienes"],
+    "Brecha (pp)": [
+        brecha_estrato_val,
+        brecha_zona_val,
+        brecha_bienes_val]})
+
+resumen_brechas.set_index("Dimensión").plot(kind="bar",color="indigo")
+
+resumen_brechas = resumen_brechas.sort_values(by="Brecha (pp)",ascending=False)
+
+plt.ylabel("Brecha en puntos porcentuales")
+plt.title("Comparación de intensidad de desigualdad")
+plt.xticks(rotation=0)
+plt.show()
