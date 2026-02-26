@@ -418,3 +418,20 @@ plt.xlabel("Zona")
 plt.ylabel("Porcentaje (%)")
 plt.legend()
 plt.show()
+
+#Mapa de calor: estrato, zona y nivel bajo
+tabla_heat = (
+    pd.crosstab(
+        [df_p3["estrato_grupo"], df_p3["zona"]],
+        df_p3["es_bajo"],
+        normalize="index") * 100).round(2)
+
+tabla_heat.columns = ["No bajo", "Bajo"]
+
+#Graficar
+plt.figure()
+sns.heatmap(tabla_heat, annot=True)  
+plt.title("Proporción de nivel bajo por Estrato y Zona")
+plt.ylabel("Grupo de estrato")
+plt.xlabel("Zona")
+plt.show()
