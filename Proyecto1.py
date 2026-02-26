@@ -229,7 +229,7 @@ def generar_imagenesp1(df, desigualdad):
     plt.xticks(rotation=45)
     plt.xlabel("Municipio")
     plt.ylabel("Coeficiente de variación")
-    plt.title("Top 10 municipios con mayor desigualdad interna")
+    plt.title("Top 10 municipios con mayor coeficiente de variación de dispersión interna")
     img_p1_2 = fig_a_base64(fig_p1_2)
 
     return img_p1_1, img_p1_2

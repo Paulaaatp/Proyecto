@@ -142,7 +142,7 @@ plt.bar(top10["estu_mcpio_reside"],
 plt.xticks(rotation=45)
 plt.xlabel("Municipio")
 plt.ylabel("Coeficiente de variación")
-plt.title("Top 10 municipios con mayor desigualdad interna")
+plt.title("Top 10 municipios con mayor coeficiente de variación de dispersión interna")
 plt.show()
 
 

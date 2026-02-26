@@ -21,6 +21,8 @@ server= app.server
 app.layout = html.Div(
     style = {"fontFamily": "Arial", "padding": "20px"},
     children=[
+        html.Img(src="/assets/logo_andes.png", style={"height": "80px"}),
+        html.Img(src="/assets/logo_cauca.png", style={"height": "80px"}),
         html.H1("Análisis de la desigualdad educativa en Cauca", style={'textAlign': 'center'}),
         html.Div(children= '''Este tablero presenta un análisis de la desigualdad educativa en el departamento del Cauca,
                   Colombia. Se han utilizado datos de la pruebas Saber 11 para explorar las diferencias en 
