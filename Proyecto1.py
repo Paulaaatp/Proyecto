@@ -266,6 +266,8 @@ df["cole_area_ubicacion"].unique()#se deja así
 
 df["estu_privado_libertad"].unique()
 df_p3["privado"] = df_p3["privado"].map({"S": 1,"N": 0})
+df["estu_privado_libertad"].shape
+total =df_p3["privado"].sum() #nadie es privado de su libertad
 
 df["fami_cuartoshogar"].unique() #variables dificiles
 
@@ -296,7 +298,7 @@ pd.set_option("display.max_columns", None) #visualizar todas las columnas
 #print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
 
 #ANALISIS ESTADISTICO POR VARIABLE
-#Estrato
+###Estrato
 #Frecuencias y porcentajes
 freq_estrato = df_p3["estrato"].value_counts(dropna=False).sort_index()
 pct_estrato = df_p3["estrato"].value_counts(normalize=True, dropna=False).sort_index()
@@ -380,7 +382,7 @@ plt.xticks(rotation=30)
 plt.legend()
 plt.show()
 
-#Zona 
+###Zona 
 #Frecuencias y porcentajes
 freq_zona = df_p3["zona"].value_counts()
 pct_zona = df_p3["zona"].value_counts(normalize=True).mul(100).round(2)
@@ -429,7 +431,6 @@ tabla_comp = (
 tabla_comp.columns = ["No bajo", "Bajo"]
 tabla_comp_bajo = tabla_comp["Bajo"].unstack()
 
-
 #Alernativas 
 #Grafico de lineas 
 tabla_comp_bajo.plot(marker="o")
@@ -445,3 +446,20 @@ plt.ylabel("% en nivel bajo")
 plt.xticks(rotation=30)
 plt.show()
 
+##Posesión de bienes
+cols_bienes = ["carro", "internet", "pc", "lavadora"]
+df_p3["indice_bienes"].value_counts()
+
+pd.crosstab(df_p3["indice_bienes"], df["nivel_global"], normalize="index")
+df.groupby("indice_bienes")["punt_global"].mean()
+df["categoria_bienes"] = pd.cut(
+    df_p3["indice_bienes"],
+    bins=[-1,1,3,4],
+    labels=["Bajo acceso", "Medio acceso", "Alto acceso"]
+)
+df_p3["categoria_bienes"] = pd.cut(
+    df_p3["indice_bienes"],
+    bins=[-1,1,3,4],
+    labels=["Bajo acceso", "Medio acceso", "Alto acceso"]
+)
+pd.crosstab(df_p3["categoria_bienes"], df["nivel_global"], normalize="index")
