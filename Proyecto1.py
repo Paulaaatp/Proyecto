@@ -348,3 +348,237 @@ plt.title("Puntaje promedio según combinación educativa Padre × Madre\n""(sol
 
 plt.tight_layout()
 plt.show()
+
+########### PREGUNTA 3 - PERFIL SOCIODEMOGRAFICO
+#LIMPIEZA Y ORGANIZACION DE VARIABLES
+#Variable binaria - pertenencia al cuartil bajo
+df["es_bajo"] = (df["nivel_global"] == "Bajo").astype(int)
+
+#Crear df con las variables de interés
+df_p3 = df[["cole_area_ubicacion","estu_privado_libertad", "fami_cuartoshogar", 
+            "fami_estratovivienda", "fami_personashogar", 
+            "fami_tieneautomovil", "fami_tienecomputador", 
+            "fami_tieneinternet", "fami_tienelavadora" ,"es_bajo"]]
+
+#Cambiar el nombre de los headers 
+df_p3.rename(columns={
+    "cole_area_ubicacion": "zona",
+    "estu_privado_libertad": "privado",
+    "fami_cuartoshogar": "cuartos",
+    "fami_estratovivienda": "estrato",
+    "fami_personashogar": "personas",
+    "fami_tieneautomovil": "carro",
+    "fami_tienecomputador": "pc",
+    "fami_tieneinternet": "internet",
+    "fami_tienelavadora": "lavadora",
+}, inplace=True)
+
+# Convertir a número o a variables binarias 
+    #Revisar los valores que entran a cada variable y cambiarlo si es necesario
+df["cole_area_ubicacion"].unique()#se deja así 
+
+df["estu_privado_libertad"].unique()
+df_p3["privado"] = df_p3["privado"].map({"S": 1,"N": 0})
+df["estu_privado_libertad"].shape
+total =df_p3["privado"].sum() #nadie es privado de su libertad
+
+df["fami_cuartoshogar"].unique() #variables dificiles
+
+df["fami_estratovivienda"].unique()
+df_p3["estrato"] = df_p3["estrato"].map({"Estrato 1":1,
+                                         "Estrato 2":2,
+                                         "Estrato 3":3,
+                                         "Estrato 4":4,
+                                         "Estrato 5":5,
+                                         "Estrato 6":6})
+
+df["fami_personashogar"].unique() #variables dificiles
+
+df["fami_tieneautomovil"].unique()
+df_p3["carro"] = df_p3["carro"].map({"Si": 1,"No": 0}) 
+
+df["fami_tienecomputador"].unique()
+df_p3["pc"] = df_p3["pc"].map({"Si": 1,"No": 0})
+
+df["fami_tieneinternet"].unique()
+df_p3["internet"] = df_p3["internet"].map({"Si": 1,"No": 0})
+
+df["fami_tienelavadora"].unique()
+df_p3["lavadora"] = df_p3["lavadora"].map({"Si": 1,"No": 0})
+
+#Visualización   
+pd.set_option("display.max_columns", None) #visualizar todas las columnas        
+#print(df_p3.head().to_string(index=False)) #imprimir sin el índice 
+
+#ANALISIS ESTADISTICO POR VARIABLE
+###Estrato
+#Frecuencias y porcentajes
+freq_estrato = df_p3["estrato"].value_counts(dropna=False).sort_index()
+pct_estrato = df_p3["estrato"].value_counts(normalize=True, dropna=False).sort_index()
+
+resumen_estrato = (pd.DataFrame({"N": freq_estrato, "Porcentaje": (pct_estrato*100).round(2)}))
+print(resumen_estrato) # Hay una gran concentración en estratos bajos y muchos NaN.
+
+# ~Revisar si los NaN son aleatorios para evaluar si se pueden eliminar.
+# Proporción de nivel bajo en quienes NO reportan estrato
+prop_nan = df_p3[df_p3["estrato"].isna()]["es_bajo"].mean() #%muy alto, no son aleatorios.
+# Proporción de nivel bajo en quienes sí reportan estrato
+prop_no_nan = df_p3[~df_p3["estrato"].isna()]["es_bajo"].mean()
+print(prop_nan, prop_no_nan) 
+
+#Agrupar estratos en categorías más amplias
+df_p3["estrato_grupo"] = df_p3["estrato"].fillna(0)
+
+df_p3["estrato_grupo"] = df_p3["estrato_grupo"].map({
+    0: "No reporta",
+    1: "Estrato 1",
+    2: "Estrato 2",
+    3: "Estrato 3+",
+    4: "Estrato 3+",
+    5: "Estrato 3+",
+    6: "Estrato 3+"})
+
+freq_estrato_grupo = df_p3["estrato_grupo"].value_counts(dropna=False).sort_index()
+pct_estrato_grupo = df_p3["estrato_grupo"].value_counts(normalize=True, dropna=False).sort_index()
+
+resumen_estrato_grupo = (pd.DataFrame({"N": freq_estrato_grupo, "Porcentaje": (pct_estrato_grupo*100).round(2)}))
+
+#Graficar
+orden = ["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"] #asegurar orden
+resumen_estrato_grupo = resumen_estrato_grupo.reindex(orden)
+
+plt.figure()
+plt.bar(resumen_estrato_grupo.index, resumen_estrato_grupo["Porcentaje"])
+plt.title("Distribución de estudiantes por grupo de estrato")
+plt.xlabel("Grupo de estrato")
+plt.ylabel("Porcentaje (%)")
+plt.xticks(rotation=30)
+plt.show()
+
+#Hacer comparación con estratos y nivel bajo
+tabla_grupo = (
+    df_p3.groupby("estrato_grupo")
+         .agg(
+             N=("es_bajo","size"),
+             prop_bajo=("es_bajo","mean")
+         )
+         .assign(pct_bajo=lambda x: (x["prop_bajo"]*100).round(2))
+         .sort_values("pct_bajo", ascending=False))
+
+#Graficar
+plt.figure()
+plt.bar(tabla_grupo.index, tabla_grupo["pct_bajo"])
+plt.title("Proporción de nivel bajo por grupo de estrato")
+plt.xlabel("Grupo de estrato")
+plt.ylabel("% en nivel bajo")
+plt.xticks(rotation=30)
+plt.show()
+
+#Barras apiladas para mejor comprensión
+tabla_stack = (pd.crosstab(df_p3["estrato_grupo"], 
+                df_p3["es_bajo"], 
+                normalize="index"))
+
+tabla_stack = (tabla_stack * 100).round(2)
+
+#Graficar 
+tabla_stack.columns = ["No bajo", "Bajo"]
+tabla_stack = tabla_stack.reindex(["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"])
+
+plt.figure()
+plt.bar(tabla_stack.index, tabla_stack["No bajo"], label="No bajo")
+plt.bar(tabla_stack.index, tabla_stack["Bajo"], bottom=tabla_stack["No bajo"], label="Bajo")
+plt.title("Composición de nivel global por grupo de estrato")
+plt.xlabel("Grupo de estrato")
+plt.ylabel("Porcentaje (%)")
+plt.xticks(rotation=30)
+plt.legend()
+plt.show()
+
+###Zona 
+#Frecuencias y porcentajes
+freq_zona = df_p3["zona"].value_counts()
+pct_zona = df_p3["zona"].value_counts(normalize=True).mul(100).round(2)
+resumen_zona = pd.DataFrame({"N": freq_zona,"Porcentaje": pct_zona}) 
+
+#Comparación zona y nivel bajo
+tabla_zona_bajo = (
+    df_p3.groupby("zona")
+         .agg(
+             N=("es_bajo","size"),
+             prop_bajo=("es_bajo","mean")
+         )
+         .assign(pct_bajo=lambda x: (x["prop_bajo"]*100).round(2)))
+
+#Barras apiladas para mejor comprensión
+tabla_stack_zona = (
+    pd.crosstab(
+        df_p3["zona"],
+        df_p3["es_bajo"],
+        normalize="index") * 100).round(2)
+
+tabla_stack_zona.columns = ["No bajo", "Bajo"]
+
+#Graficar 
+plt.figure()
+plt.bar(tabla_stack_zona.index, 
+        tabla_stack_zona["No bajo"], 
+        label="No bajo")
+plt.bar(tabla_stack_zona.index, 
+        tabla_stack_zona["Bajo"], 
+        bottom=tabla_stack_zona["No bajo"], 
+        label="Bajo")
+plt.title("Composición del nivel global por zona")
+plt.xlabel("Zona")
+plt.ylabel("Porcentaje (%)")
+plt.legend()
+plt.show()
+
+#Grafica: estrato, zona y nivel bajo
+tabla_comp = (
+    pd.crosstab(
+        [df_p3["estrato_grupo"], df_p3["zona"]],
+        df_p3["es_bajo"],
+        normalize="index") * 100).round(2)
+
+tabla_comp.columns = ["No bajo", "Bajo"]
+tabla_comp_bajo = tabla_comp["Bajo"].unstack()
+
+#Alernativas 
+#Grafico de lineas 
+tabla_comp_bajo.plot(marker="o")
+plt.title("Proporción de nivel bajo por Estrato y Zona")
+plt.ylabel("% en nivel bajo")
+plt.xlabel("Grupo de estrato")
+plt.show()
+
+#Grafico de barras agrupadas
+tabla_comp_bajo.plot(kind="bar")
+plt.title("Proporción de nivel bajo por Estrato y Zona")
+plt.ylabel("% en nivel bajo")
+plt.xticks(rotation=30)
+plt.show()
+
+###Posesión de bienes
+cols_bienes = ["carro", "internet", "pc", "lavadora"]
+df_p3[cols_bienes].isna().all(axis=1).sum() #estudiantes que no reportan nada
+df_p3["indice_bienes"] = df_p3[cols_bienes].sum(axis=1, min_count=1)#no muestra filas NaN
+df_p3["indice_bienes"].value_counts().sort_index()
+
+tabla_bienes =pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")*100
+
+#Graficar
+tabla_bienes.plot(kind="bar", stacked=True)
+
+tabla_bienes.index = [
+    "Sin bienes",
+    "1 bien",
+    "2 bienes",
+    "3 bienes",
+    "4 bienes"]
+
+plt.ylabel("Porcentaje (%)")
+plt.xlabel("Cantidad de bienes del hogar")
+plt.title("Proporción de estudiantes en nivel bajo según bienes")
+plt.legend(["No es bajo", "Es bajo"])
+plt.show()
