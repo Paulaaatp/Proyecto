@@ -327,7 +327,6 @@ freq_estrato_grupo = df_p3["estrato_grupo"].value_counts(dropna=False).sort_inde
 pct_estrato_grupo = df_p3["estrato_grupo"].value_counts(normalize=True, dropna=False).sort_index()
 
 resumen_estrato_grupo = (pd.DataFrame({"N": freq_estrato_grupo, "Porcentaje": (pct_estrato_grupo*100).round(2)}))
-print(resumen_estrato_grupo) # La mayoría de los estudiantes pertenecen a estratos bajos, con una gran proporción que no reporta.
 
 #Graficar
 orden = ["Estrato 1", "Estrato 2", "Estrato 3+", "No reporta"] #asegurar orden
@@ -378,5 +377,44 @@ plt.title("Composición de nivel global por grupo de estrato")
 plt.xlabel("Grupo de estrato")
 plt.ylabel("Porcentaje (%)")
 plt.xticks(rotation=30)
+plt.legend()
+plt.show()
+
+#Zona 
+#Frecuencias y porcentajes
+freq_zona = df_p3["zona"].value_counts()
+pct_zona = df_p3["zona"].value_counts(normalize=True).mul(100).round(2)
+resumen_zona = pd.DataFrame({"N": freq_zona,"Porcentaje": pct_zona}) 
+
+#Comparación zona y nivel bajo
+tabla_zona_bajo = (
+    df_p3.groupby("zona")
+         .agg(
+             N=("es_bajo","size"),
+             prop_bajo=("es_bajo","mean")
+         )
+         .assign(pct_bajo=lambda x: (x["prop_bajo"]*100).round(2)))
+
+#Barras apiladas para mejor comprensión
+tabla_stack_zona = (
+    pd.crosstab(
+        df_p3["zona"],
+        df_p3["es_bajo"],
+        normalize="index") * 100).round(2)
+
+tabla_stack_zona.columns = ["No bajo", "Bajo"]
+
+#Graficar 
+plt.figure()
+plt.bar(tabla_stack_zona.index, 
+        tabla_stack_zona["No bajo"], 
+        label="No bajo")
+plt.bar(tabla_stack_zona.index, 
+        tabla_stack_zona["Bajo"], 
+        bottom=tabla_stack_zona["No bajo"], 
+        label="Bajo")
+plt.title("Composición del nivel global por zona")
+plt.xlabel("Zona")
+plt.ylabel("Porcentaje (%)")
 plt.legend()
 plt.show()
