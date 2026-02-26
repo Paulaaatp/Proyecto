@@ -448,11 +448,13 @@ plt.show()
 
 ##Posesión de bienes
 cols_bienes = ["carro", "internet", "pc", "lavadora"]
-df_p3["indice_bienes"].value_counts()
+df_p3["indice_bienes"] = df_p3[cols_bienes].sum(axis=1)
+df_p3["indice_bienes"].value_counts().sort_index()
 
-pd.crosstab(df_p3["indice_bienes"], df["nivel_global"], normalize="index")
-df.groupby("indice_bienes")["punt_global"].mean()
-df["categoria_bienes"] = pd.cut(
+pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")
+
+df_p3.groupby("indice_bienes")["es_bajo"].mean()
+df_p3["categoria_bienes"] = pd.cut(
     df_p3["indice_bienes"],
     bins=[-1,1,3,4],
     labels=["Bajo acceso", "Medio acceso", "Alto acceso"]
@@ -462,4 +464,3 @@ df_p3["categoria_bienes"] = pd.cut(
     bins=[-1,1,3,4],
     labels=["Bajo acceso", "Medio acceso", "Alto acceso"]
 )
-pd.crosstab(df_p3["categoria_bienes"], df["nivel_global"], normalize="index")
