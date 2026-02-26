@@ -216,48 +216,9 @@ plt.show()
 # Limpiar categorías no válidas
 categorias_excluir = ["No Aplica", "No sabe", "Ninguno"]
 
-df_educ = df[
+df = df[
     (~df["fami_educacionpadre"].isin(categorias_excluir)) &
     (~df["fami_educacionmadre"].isin(categorias_excluir))].copy()
-
-# PROMEDIO SEGÚN EDUCACIÓN PADRE
-df_padre = (
-    df_educ
-    .groupby("fami_educacionpadre")["punt_global"]
-    .agg(["count", "mean"])
-    .reset_index()
-    .rename(columns={
-        "count": "n_estudiantes",
-        "mean": "promedio_punt_global"
-    }).sort_values("promedio_punt_global"))
-
-df_padre["promedio_punt_global"] = df_padre["promedio_punt_global"].round(2)
-
-print("\nPromedio según educación del padre")
-print(df_padre)
-
-# PROMEDIO SEGÚN EDUCACIÓN MADRE
-df_madre = (
-    df_educ
-    .groupby("fami_educacionmadre")["punt_global"]
-    .agg(["count", "mean"])
-    .reset_index()
-    .rename(columns={
-        "count": "n_estudiantes",
-        "mean": "promedio_punt_global"
-    }).sort_values("promedio_punt_global"))
-
-df_madre["promedio_punt_global"] = df_madre["promedio_punt_global"].round(2)
-
-print("\nPromedio según educación de la madre")
-print(df_madre)
-
-# BRECHA ENTRE EXTREMOS
-brecha_padre = df_padre["promedio_punt_global"].max() - df_padre["promedio_punt_global"].min()
-brecha_madre = df_madre["promedio_punt_global"].max() - df_madre["promedio_punt_global"].min()
-
-print("\nBrecha educación padre:", round(brecha_padre,2))
-print("Brecha educación madre:", round(brecha_madre,2))
 
 # ORDEN EDUCATIVO PERSONALIZADO
 orden_educativo = [
@@ -271,7 +232,62 @@ orden_educativo = [
     "Educación profesional completa",
     "Postgrado"]
 
+# 2Convertir variables en categóricas ordenadas
+df["fami_educacionpadre"] = pd.Categorical(
+    df["fami_educacionpadre"],
+    categories=orden_educativo,
+    ordered=True)
+
+df["fami_educacionmadre"] = pd.Categorical(
+    df["fami_educacionmadre"],
+    categories=orden_educativo,
+    ordered=True)
+
+# TABLA PADRE
+tabla_padre = df.groupby("fami_educacionpadre")["punt_global"].agg(
+    n_estudiantes="count",media="mean",desviacion="std").reset_index().sort_values("fami_educacionpadre")
+
+tabla_padre["media"] = tabla_padre["media"].round(2)
+tabla_padre["desviacion"] = tabla_padre["desviacion"].round(2)
+
+# Visualización padre
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.axis("off")
+tabla = ax.table(cellText=tabla_padre.values,colLabels=tabla_padre.columns,cellLoc="center",loc="center")
+
+tabla.auto_set_font_size(False)
+tabla.set_fontsize(10)
+tabla.auto_set_column_width(col=list(range(len(tabla_padre.columns))))
+
+plt.title("Desempeño según nivel educativo del padre", pad=20)
+plt.tight_layout()
+plt.show()
+
+# 4TABLA MADRE
+tabla_madre = df.groupby("fami_educacionmadre")["punt_global"].agg(n_estudiantes="count",media="mean",desviacion="std").reset_index().sort_values("fami_educacionmadre")
+tabla_madre["media"] = tabla_madre["media"].round(2)
+tabla_madre["desviacion"] = tabla_madre["desviacion"].round(2)
+
+# Visualización madre
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.axis("off")
+
+tabla = ax.table(cellText=tabla_madre.values,colLabels=tabla_madre.columns,cellLoc="center",loc="center")
+
+tabla.auto_set_font_size(False)
+tabla.set_fontsize(10)
+tabla.auto_set_column_width(col=list(range(len(tabla_madre.columns))))
+
+plt.title("Desempeño según nivel educativo de la madre", pad=20)
+plt.tight_layout()
+plt.show()
+
 # GRÁFICO DE BARRAS COMBINADO
+df_padre = df.groupby("fami_educacionpadre")["punt_global"].mean().reset_index()
+df_padre = df_padre.rename(columns={"punt_global": "promedio_punt_global"})
+
+df_madre = df.groupby("fami_educacionmadre")["punt_global"].mean().reset_index()
+df_madre = df_madre.rename(columns={"punt_global": "promedio_punt_global"})
 niveles_comunes = [
     nivel for nivel in orden_educativo
     if nivel in df_padre["fami_educacionpadre"].values
@@ -304,9 +320,7 @@ plt.tight_layout()
 plt.show()
 
 # MATRIZ CRUZADA PADRE × MADRE
-df_matriz = (
-    df_educ
-    .pivot_table(
+df_matriz = (df.pivot_table(
         values="punt_global",
         index="fami_educacionpadre",
         columns="fami_educacionmadre",
@@ -314,19 +328,23 @@ df_matriz = (
 
 print("\nMatriz Padre x Madre (Promedios)")
 print(df_matriz)
+
+df_matriz_conteo = df.pivot_table(values="punt_global",index="fami_educacionpadre",columns="fami_educacionmadre",aggfunc="count")
 # HEATMAP PADRE × MADRE
+df_matriz_ordenada = df_matriz.reindex(index=orden_educativo,columns=orden_educativo)
+df_conteo_ordenado = df_matriz_conteo.reindex(index=orden_educativo,columns=orden_educativo)
+
+# poner en blanco combinaciones con menos de 100 estudiantes
+df_matriz_filtrada = df_matriz_ordenada.where(df_conteo_ordenado >= 30)
 plt.figure(figsize=(10,8))
-plt.imshow(df_matriz, aspect='auto')
-plt.colorbar(label="Puntaje Global Promedio")
-plt.xticks(
-    np.arange(len(df_matriz.columns)),
-    df_matriz.columns,
-    rotation=45,
-    ha='right')
-plt.yticks(
-    np.arange(len(df_matriz.index)),
-    df_matriz.index)
-plt.title("Puntaje promedio según combinación educativa Padre × Madre")
+
+im = plt.imshow(df_matriz_filtrada, aspect='auto')
+plt.colorbar(im, label="Puntaje Global Promedio")
+plt.xticks(np.arange(len(df_matriz_filtrada.columns)),df_matriz_filtrada.columns,rotation=45,ha='right')
+
+plt.yticks(np.arange(len(df_matriz_filtrada.index)),df_matriz_filtrada.index)
+
+plt.title("Puntaje promedio según combinación educativa Padre × Madre\n""(solo combinaciones con ≥ 30 estudiantes)")
 
 plt.tight_layout()
 plt.show()
