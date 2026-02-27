@@ -1,20 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from dash import dash_table
 
-#CONFIGURACIÓN PARA DASH
-import io
-import base64
-
-def fig_a_base64(fig):
-    """Convierte un matplotlib Figure a un string base64 para usar en Dash."""
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
-    buf.seek(0)
-    img_base64 = base64.b64encode(buf.read()).decode("utf-8")
-    plt.close(fig)  # evita acumulación de memoria
-    return "data:image/png;base64," + img_base64
-#############
 def cargar_y_preparar():    
     df = pd.read_csv("datos_cauca.csv")
     df.columns = df.columns.str.lower().str.strip()
@@ -193,7 +183,7 @@ def cargar_y_preparar():
     #Barras apiladas para mejor comprensión
     return df, df_p3, desigualdad, orden_educativo
 
-def generar_imagenesp1(df, desigualdad):
+def pregunta1(df, desigualdad):
     #Calcular coeficiente de variación y usarlo en gráficas
     desigualdad = desigualdad.copy()
     desigualdad["coef_variacion"] = (
@@ -210,31 +200,39 @@ def generar_imagenesp1(df, desigualdad):
         "coef_variacion", ascending=False)
     top10 = top_desigualdad.head(10)
     municipios_top = top10["estu_mcpio_reside"]
+    
+    #Boxplot
+    df_top = df[df["estu_mcpio_reside"].isin(municipios_top)]
 
-    fig_p1_1 = plt.figure()
-    df[df["estu_mcpio_reside"].isin(municipios_top)] \
-        .boxplot(column="punt_global", by="estu_mcpio_reside")
-    plt.xticks(rotation=45)
-    plt.suptitle("")
-    plt.title("Distribución del puntaje en municipios con mayor coeficiente de variación de dispersión")
-    img_p1_1 = fig_a_base64(fig_p1_1)
+    fig_p1_1 = px.box(
+        df_top,
+        x="estu_mcpio_reside",
+        y="punt_global",
+        title="Distribución del puntaje en municipios con mayor coeficiente de variación")
+
+    fig_p1_1.update_layout(
+        xaxis_tickangle=45)
+
+    #Grafico de barras
+    top10 = top10.copy()
 
     colores = ["darkred"] + ["lightcoral"]*(len(top10)-1)
+    top10["color"] = colores
 
-    fig_p1_2 = plt.figure()
-    plt.bar(top10["estu_mcpio_reside"],
-        top10["coef_variacion"],
-        color=colores)
+    fig_p1_2 = px.bar(
+        top10,
+        x="estu_mcpio_reside",
+        y="coef_variacion",
+        title="Top 10 municipios con mayor coeficiente de variación",
+        color="color",
+        color_discrete_map="identity")
 
-    plt.xticks(rotation=45)
-    plt.xlabel("Municipio")
-    plt.ylabel("Coeficiente de variación")
-    plt.title("Top 10 municipios con mayor coeficiente de variación de dispersión interna")
-    img_p1_2 = fig_a_base64(fig_p1_2)
+    fig_p1_2.update_layout(
+        xaxis_tickangle=45)
 
-    return img_p1_1, img_p1_2
+    return fig_p1_1, fig_p1_2
 
-def generar_imagenesp2(df, orden_educativo):
+def pregunta2(df, orden_educativo):
     # TABLA PADRE
     tabla_padre = df.groupby("fami_educacionpadre")["punt_global"].agg(
         n_estudiantes="count",media="mean",desviacion="std").reset_index().sort_values("fami_educacionpadre")
@@ -243,36 +241,29 @@ def generar_imagenesp2(df, orden_educativo):
     tabla_padre["desviacion"] = tabla_padre["desviacion"].round(2)
 
     # Visualización padre
-    fig_p2_1, ax = plt.subplots(figsize=(10, 4))
-    ax.axis("off")
-    tabla = ax.table(cellText=tabla_padre.values,colLabels=tabla_padre.columns,cellLoc="center",loc="center")
+    tabla_padre_dash = dash_table.DataTable(
+        data=tabla_padre.to_dict("records"),
+        columns=[{"name": c, "id": c} for c in tabla_padre.columns],
+        page_size=10,
+        sort_action="native",
+        filter_action="native",
+        style_table={"overflowX": "auto"},
+        style_cell={"textAlign": "center", "padding": "6px"},)
 
-    tabla.auto_set_font_size(False)
-    tabla.set_fontsize(10)
-    tabla.auto_set_column_width(col=list(range(len(tabla_padre.columns))))
-
-    plt.title("Desempeño según nivel educativo del padre", pad=20)
-    plt.tight_layout()
-    img_p2_1 = fig_a_base64(fig_p2_1)
-
-    # 4TABLA MADRE
+    # TABLA MADRE
     tabla_madre = df.groupby("fami_educacionmadre")["punt_global"].agg(n_estudiantes="count",media="mean",desviacion="std").reset_index().sort_values("fami_educacionmadre")
     tabla_madre["media"] = tabla_madre["media"].round(2)
     tabla_madre["desviacion"] = tabla_madre["desviacion"].round(2)
 
     # Visualización madre
-    fig_p2_2, ax = plt.subplots(figsize=(10, 4))
-    ax.axis("off")
-
-    tabla = ax.table(cellText=tabla_madre.values,colLabels=tabla_madre.columns,cellLoc="center",loc="center")
-
-    tabla.auto_set_font_size(False)
-    tabla.set_fontsize(10)
-    tabla.auto_set_column_width(col=list(range(len(tabla_madre.columns))))
-
-    plt.title("Desempeño según nivel educativo de la madre", pad=20)
-    plt.tight_layout()
-    img_p2_2 = fig_a_base64(fig_p2_2)
+    tabla_madre_dash = dash_table.DataTable(
+        data=tabla_madre.to_dict("records"),
+        columns=[{"name": c, "id": c} for c in tabla_madre.columns],
+        page_size=10,
+        sort_action="native",
+        filter_action="native",
+        style_table={"overflowX": "auto"},
+        style_cell={"textAlign": "center", "padding": "6px"})
 
     # GRÁFICO DE BARRAS COMBINADO
     df_padre = df.groupby("fami_educacionpadre")["punt_global"].mean().reset_index()
@@ -280,6 +271,7 @@ def generar_imagenesp2(df, orden_educativo):
 
     df_madre = df.groupby("fami_educacionmadre")["punt_global"].mean().reset_index()
     df_madre = df_madre.rename(columns={"punt_global": "promedio_punt_global"})
+
     niveles_comunes = [
         nivel for nivel in orden_educativo
         if nivel in df_padre["fami_educacionpadre"].values
@@ -287,29 +279,30 @@ def generar_imagenesp2(df, orden_educativo):
 
     padre_plot = df_padre[
         df_padre["fami_educacionpadre"].isin(niveles_comunes)
-    ].set_index("fami_educacionpadre").loc[niveles_comunes]
+    ].set_index("fami_educacionpadre").loc[niveles_comunes].reset_index()
 
     madre_plot = df_madre[
         df_madre["fami_educacionmadre"].isin(niveles_comunes)
-    ].set_index("fami_educacionmadre").loc[niveles_comunes]
+    ].set_index("fami_educacionmadre").loc[niveles_comunes].reset_index()
 
-    x = np.arange(len(niveles_comunes))
-    width = 0.35
+    fig_p2_3 = go.Figure()
+    fig_p2_3.add_trace(go.Bar(
+        x=niveles_comunes,
+        y=padre_plot["promedio_punt_global"],
+        name="Padre"))
+    
+    fig_p2_3.add_trace(go.Bar(
+        x=niveles_comunes,
+        y=madre_plot["promedio_punt_global"],
+        name="Madre"))
 
-    fig_p2_3 = plt.figure(figsize=(12,6))
-
-    plt.bar(x - width/2, padre_plot["promedio_punt_global"],
-            width, label="Padre", color="steelblue")
-
-    plt.bar(x + width/2, madre_plot["promedio_punt_global"],
-            width, label="Madre", color="mediumseagreen")
-
-    plt.xticks(x, niveles_comunes, rotation=45, ha='right')
-    plt.ylabel("Puntaje Global Promedio")
-    plt.title("Puntaje promedio según nivel educativo de los padres")
-    plt.legend()
-    plt.tight_layout()
-    img_p2_3 = fig_a_base64(fig_p2_3)
+    fig_p2_3.update_layout(
+        barmode="group",
+        title="Puntaje promedio según nivel educativo de los padres",
+        xaxis_title="Nivel educativo",
+        yaxis_title="Puntaje Global Promedio",
+        xaxis_tickangle=45,
+        legend_title_text="")
 
     # MATRIZ CRUZADA PADRE × MADRE
     df_matriz = (df.pivot_table(
@@ -319,28 +312,27 @@ def generar_imagenesp2(df, orden_educativo):
             aggfunc="mean").round(2))
 
     df_matriz_conteo = df.pivot_table(values="punt_global",index="fami_educacionpadre",columns="fami_educacionmadre",aggfunc="count")
+    
     # HEATMAP PADRE × MADRE
     df_matriz_ordenada = df_matriz.reindex(index=orden_educativo,columns=orden_educativo)
     df_conteo_ordenado = df_matriz_conteo.reindex(index=orden_educativo,columns=orden_educativo)
 
     # poner en blanco combinaciones con menos de 100 estudiantes
     df_matriz_filtrada = df_matriz_ordenada.where(df_conteo_ordenado >= 30)
-    fig_p2_4 = plt.figure(figsize=(10,8))
+    
+    #Visualizar
+    fig_p2_4 = px.imshow(
+        df_matriz_filtrada,
+        aspect="auto",
+        title="Puntaje promedio según combinación educativa Padre × Madre (solo combinaciones con ≥ 30 estudiantes)",
+        labels={"color": "Puntaje Global Promedio"})
 
-    im = plt.imshow(df_matriz_filtrada, aspect='auto')
-    plt.colorbar(im, label="Puntaje Global Promedio")
-    plt.xticks(np.arange(len(df_matriz_filtrada.columns)),df_matriz_filtrada.columns,rotation=45,ha='right')
+    fig_p2_4.update_layout(
+        xaxis_tickangle=45)
 
-    plt.yticks(np.arange(len(df_matriz_filtrada.index)),df_matriz_filtrada.index)
+    return tabla_padre_dash, tabla_madre_dash, fig_p2_3, fig_p2_4
 
-    plt.title("Puntaje promedio según combinación educativa Padre × Madre\n""(solo combinaciones con ≥ 30 estudiantes)")
-
-    plt.tight_layout()
-    img_p2_4 = fig_a_base64(fig_p2_4)
-
-    return img_p2_1, img_p2_2, img_p2_3, img_p2_4
-
-def generar_imagenesp3(df_p3):
+def pregunta3(df_p3):
     #Grafica: estrato, zona y nivel bajo
     df_p3 = df_p3.copy()
     tabla_comp = (
@@ -353,39 +345,59 @@ def generar_imagenesp3(df_p3):
     tabla_comp_bajo = tabla_comp["Bajo"].unstack()
 
     #Grafico de barras agrupadas
-    ax1 = tabla_comp_bajo.plot(kind="bar", color=["indigo", "deepskyblue"])
-    fig_p3_1 = ax1.get_figure()
-    plt.title("Proporción de nivel bajo por Estrato y Zona")
-    plt.ylabel("% en nivel bajo")
-    plt.xticks(rotation=30)
-    #plt.show()
-    img_p3_1 = fig_a_base64(fig_p3_1)
+    df_plot1 = tabla_comp_bajo.reset_index().melt(
+        id_vars="estrato_grupo",
+        var_name="zona",
+        value_name="pct_bajo")
+
+    fig_p3_1 = px.bar(
+        df_plot1,
+        x="estrato_grupo",
+        y="pct_bajo",
+        color="zona",
+        barmode="group",
+        title="Proporción de nivel bajo por Estrato y Zona",
+        labels={"estrato_grupo": "Estrato", "pct_bajo": "% en nivel bajo", "zona": "Zona"},
+        color_discrete_sequence=["indigo", "deepskyblue"])
+    fig_p3_1.update_layout(xaxis_tickangle=30)
 
     ###Posesión de bienes
     cols_bienes = ["carro", "internet", "pc", "lavadora"]
     df_p3["indice_bienes"] = df_p3[cols_bienes].sum(axis=1, min_count=1)#no muestra filas NaN
     df_p3["indice_bienes"].value_counts().sort_index()
 
-    tabla_bienes =pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")*100
+    tabla_bienes =(pd.crosstab(df_p3["indice_bienes"], df_p3["es_bajo"], normalize="index")*100).sort_index()
 
     #Graficar
-    tabla_bienes = tabla_bienes.sort_index()    
-    tabla_bienes.index = [
-        "Sin bienes",
-        "1 bien",
-        "2 bienes",
-        "3 bienes",
-        "4 bienes"]
+    etiquetas_bienes = {
+        0: "Sin bienes",
+        1: "1 bien",
+        2: "2 bienes",
+        3: "3 bienes",
+        4: "4 bienes"}
     
-    ax2 = tabla_bienes.plot(kind="bar", stacked=True, color=["thistle", "indigo"])
-    fig_p3_2 = ax2.get_figure()
-    plt.ylabel("Porcentaje (%)")
-    plt.xlabel("Cantidad de bienes del hogar")
-    plt.title("Proporción de estudiantes en nivel bajo según bienes")
-    plt.legend(["No es bajo", "Es bajo"])
-    plt.tight_layout()
-    #plt.show()
-    img_p3_2 = fig_a_base64(fig_p3_2)
+    tabla_bienes = tabla_bienes.reindex([0, 1, 2, 3, 4])  # en caso de que falte algún nivel
+    tabla_bienes.index = [etiquetas_bienes[i] for i in tabla_bienes.index]
+    tabla_bienes = tabla_bienes.rename(columns={0: "No es bajo", 1: "Es bajo"})
+
+    tabla_bienes_reset = tabla_bienes.reset_index().rename(columns={"index": "indice_bienes"})
+
+    df_plot2 = tabla_bienes_reset.melt(
+    id_vars="indice_bienes",
+    var_name="nivel",
+    value_name="porcentaje")
+
+    fig_p3_2 = px.bar(
+        df_plot2,
+        x="indice_bienes",
+        y="porcentaje",
+        color="nivel",
+        barmode="stack",
+        title="Proporción de estudiantes en nivel bajo según bienes",
+        labels={"indice_bienes": "Cantidad de bienes del hogar", "porcentaje": "Porcentaje (%)", "nivel": ""},
+        color_discrete_map={"No es bajo": "thistle", "Es bajo": "indigo"})
+    
+    fig_p3_2.update_layout(xaxis_tickangle=0)
 
     #SINTESIS 
     #Tabla comparativa de brechas
@@ -404,15 +416,17 @@ def generar_imagenesp3(df_p3):
             brecha_estrato_val,
             brecha_zona_val,
             brecha_bienes_val]})
+    
+    resumen_brechas = resumen_brechas.sort_values(by="Brecha (pp)", ascending=False)
 
-    resumen_brechas = resumen_brechas.sort_values(by="Brecha (pp)",ascending=False)
+    fig_p3_3 = px.bar(
+        resumen_brechas,
+        x="Dimensión",
+        y="Brecha (pp)",
+        title="Comparación de intensidad de desigualdad",
+        labels={"Dimensión": "", "Brecha (pp)": "Brecha en puntos porcentuales"},
+        color_discrete_sequence=["indigo"])
+    
+    fig_p3_3.update_layout(xaxis_tickangle=0)
 
-    fig_p3_3, ax3 = plt.subplots()
-    resumen_brechas.set_index("Dimensión").plot(kind="bar", color="indigo", ax=ax3)
-    ax3.set_ylabel("Brecha en puntos porcentuales")
-    ax3.set_title("Comparación de intensidad de desigualdad")
-    ax3.tick_params(axis="x", rotation=0)
-    plt.tight_layout()
-    img_p3_3 = fig_a_base64(fig_p3_3)
-
-    return img_p3_1, img_p3_2, img_p3_3
+    return fig_p3_1, fig_p3_2, fig_p3_3
