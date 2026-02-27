@@ -227,7 +227,10 @@ def pregunta1(df, desigualdad):
         df_top,
         x="estu_mcpio_reside",
         y="punt_global",
-        title="Distribución del puntaje en municipios con mayor coeficiente de variación")
+        title="Distribución del puntaje en municipios con mayor coeficiente de variación",
+         labels={
+            "estu_mcpio_reside": "Municipio de residencia",
+            "punt_global": "Puntaje global"})
 
     fig_p1_1.update_layout(
         xaxis_tickangle=45)
@@ -244,7 +247,9 @@ def pregunta1(df, desigualdad):
         y="coef_variacion",
         title="Top 10 municipios con mayor coeficiente de variación",
         color="color",
-        color_discrete_map="identity")
+        color_discrete_map="identity",
+        labels={"estu_mcpio_reside": "Municipio de residencia", 
+                "coef_variacion": "Coeficiente de variación"})
 
     fig_p1_2.update_layout(
         xaxis_tickangle=45)
