@@ -4,6 +4,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dash_table
+import statsmodels.api as sm
 
 def cargar_y_preparar():    
     df = pd.read_csv("datos_cauca.csv")
@@ -94,15 +95,6 @@ def cargar_y_preparar():
                                     on="estu_mcpio_reside",
                                     how="left")
 
-    import statsmodels.api as sm
-
-    variables = ["promedio", "cantidad", "desv_estrato", "prop_rural"]
-
-    for var in variables:
-        X = sm.add_constant(desigualdad[[var]])
-        y = desigualdad["coef_variacion"]
-        
-        modelo = sm.OLS(y, X).fit()
     #############
     # 1. entender como se distribuye el puntaje global según el nivel educativo de los padres
     # Limpiar categorías no válidas
@@ -183,7 +175,34 @@ def cargar_y_preparar():
     #Barras apiladas para mejor comprensión
     return df, df_p3, desigualdad, orden_educativo
 
+def analisis_regresion(desigualdad):
+    variables = ["promedio", "cantidad", "desv_estrato", "prop_rural"]
+    resultados = []
+
+    for var in variables:
+        X = sm.add_constant(desigualdad[[var]])
+        y = desigualdad["coef_variacion"] 
+        modelo = sm.OLS(y, X).fit()
+
+        resultados.append({
+            "Variable": var,
+            "R²": round(float(modelo.rsquared), 4),
+            "p-value": round(float(modelo.pvalues[var]), 4),})
+        
+    df_modelos = pd.DataFrame(resultados).sort_values("R²", ascending=False)
+
+    tabla_modelos = dash_table.DataTable(
+        data=df_modelos.to_dict("records"),
+        columns=[{"name": c, "id": c} for c in df_modelos.columns],
+        sort_action="native",
+        style_table={"overflowX": "auto"},
+        style_cell={"textAlign": "center", "padding": "6px"})
+    return tabla_modelos
+
 def pregunta1(df, desigualdad):
+    #Métrica
+    tabla_modelos = analisis_regresion(desigualdad)
+    
     #Calcular coeficiente de variación y usarlo en gráficas
     desigualdad = desigualdad.copy()
     desigualdad["coef_variacion"] = (
@@ -230,7 +249,7 @@ def pregunta1(df, desigualdad):
     fig_p1_2.update_layout(
         xaxis_tickangle=45)
 
-    return fig_p1_1, fig_p1_2
+    return fig_p1_1, fig_p1_2, tabla_modelos
 
 def pregunta2(df, orden_educativo):
     # TABLA PADRE
