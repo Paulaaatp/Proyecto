@@ -75,8 +75,8 @@ tab_portada = html.Div(#abre1
             html.Li("¿Cuáles ciudades del departamento presentan mayores niveles de desigualdad interna en los resultados" 
                     "académicos de las Pruebas Saber 11?",
                     style={"marginBottom": "15px"}),
-            html.Li("¿Cómo varía el desempeño académico de los estudiantes según el nivel educativo del padre en comparación"
-                     " con el nivel educativo de la madre?",
+            html.Li("¿Cómo se relaciona el nivel educativo del padre y de la madre, tanto de forma individual como conjunta, "
+                     "con el desempeño académico de los estudiantes en Cauca?",
                      style={"marginBottom": "15px"}),
             html.Li("¿Qué combinación de características sociodemográficas "
                     " presenta la mayor concentración de estudiantes en el nivel bajo de desempeño?",
@@ -164,20 +164,21 @@ tab_p2 = html.Div(
                 "margin": "30px auto",
                 "lineHeight": "1.6"},
             children=[
-                html.Span(
-                    "Hallazgos: ",
-                    style={
-                        "fontWeight": "bold",
-                        "fontSize": "18px",
-                        "color": "#1A3980",
-                        "textAlign" : 'justify'}
-                ),
-                html.Span(
-                    "Se observa un gradiente educativo consistente en el desempeño académico:" 
-                    " a mayor nivel educativo de los padres, mayor es el puntaje global promedio. " 
-                    "Además, cuando ambos padres presentan niveles educativos altos, el efecto es " 
-                    "acumulativo y potencia los resultados, lo que evidencia una fuerte asociación " 
-                    "entre el capital educativo del hogar y el rendimiento académico."),],),
+                html.P([
+                    html.Span(
+                        "Hallazgos: ",
+                        style={
+                            "fontWeight": "bold",
+                            "fontSize": "18px",
+                            "color": "#1A3980",
+                            "textAlign" : 'justify'}),
+                    
+                        "Se observa un gradiente educativo consistente en el desempeño académico:" 
+                        " a mayor nivel educativo de los padres, mayor es el puntaje global promedio. " 
+                        "Además, cuando ambos padres presentan niveles educativos altos, el efecto es " 
+                        "acumulativo y potencia los resultados, lo que evidencia una fuerte asociación " 
+                        "entre el capital educativo del hogar y el rendimiento académico."],
+                        style = {"textAlign" : "justify"},),],),
 
         #Tablas de la pregunta 2
         html.Div(
@@ -226,7 +227,6 @@ tab_p2 = html.Div(
                             figure=fig_p2_4,
                             style={"width": "100%", "height": "500px"},
                             config={"displayModeBar": False},),],),],),                 
-
     ],
 ),
         
@@ -244,24 +244,25 @@ tab_p3 = html.Div(
                 "margin": "30px auto",
                 "lineHeight": "1.6"},
             children=[
-                html.Span(
-                    "Hallazgos: ",
-                    style={
-                        "fontWeight": "bold",
-                        "fontSize": "18px",
-                        "color": "#1A3980",
-                        "textAlign" : 'justify'}),
-                html.Span(
-                    "Se evidencia una brecha socioeconómica marcada en el desempeño: " 
-                    "la proporción de estudiantes en nivel bajo es significativamente " 
-                    "mayor en estratos bajos, en zona rural y en hogares con menor " 
-                    "dotación de bienes. La gráfica de brecha refuerza esta desigualdad " 
-                    "al mostrar que, a medida que aumentan el estrato y los bienes del " 
-                    "hogar (y se pasa a zona urbana), la distancia en puntaje y/o en " 
-                    "probabilidad de bajo desempeño se amplía a favor de los grupos más " 
-                    "favorecidos, lo que sugiere condiciones estructurales que requieren " 
-                    "intervenciones focalizadas en los perfiles más vulnerables.", 
-                    style= {"textAlign" : "justify: "}),],),
+                html.P([
+                    html.Span(
+                        "Hallazgos: ",
+                        style={
+                            "fontWeight": "bold",
+                            "fontSize": "18px",
+                            "color": "#1A3980",
+                            "textAlign" : 'justify'}),
+                    
+                        "Se evidencia una brecha socioeconómica marcada en el desempeño: " 
+                        "la proporción de estudiantes en nivel bajo es significativamente " 
+                        "mayor en estratos bajos, en zona rural y en hogares con menor " 
+                        "dotación de bienes. La gráfica de brecha refuerza esta desigualdad " 
+                        "al mostrar que, a medida que aumentan el estrato y los bienes del " 
+                        "hogar (y se pasa a zona urbana), la distancia en puntaje y/o en " 
+                        "probabilidad de bajo desempeño se amplía a favor de los grupos más " 
+                        "favorecidos, lo que sugiere condiciones estructurales que requieren " 
+                        "intervenciones focalizadas en los perfiles más vulnerables.", ],
+                        style= {"textAlign" : "justify: "}),],),
         
         #Graficas de la pregunta 3
         html.Div(

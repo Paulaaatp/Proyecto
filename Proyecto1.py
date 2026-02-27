@@ -467,9 +467,14 @@ def pregunta3(df_p3):
         resumen_brechas,
         x="Dimensión",
         y="Brecha (pp)",
+        color = "Dimensión",
+        color_discrete_map= {
+            "Estrato": "indigo",
+            "Zona":"mediumpurple",
+            "Bienes":"thistle"},
         title="Comparación de intensidad de desigualdad",
         labels={"Dimensión": "", "Brecha (pp)": "Brecha en puntos porcentuales"},
-        color_discrete_sequence=["indigo"])
+        )
     
     fig_p3_3.update_layout(xaxis_tickangle=0)
 
