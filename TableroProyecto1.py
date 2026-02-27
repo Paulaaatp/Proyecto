@@ -71,41 +71,159 @@ tab_portada = html.Div(#abre1
         ),#cierra2
     
         html.H3("Preguntas de negocio a investigar", style={"marginTop": "40px","color" :"#1A3980"}),
-        html.Ul(children=[
+        html.Ol(children=[
             html.Li("¿Cuáles ciudades del departamento presentan mayores niveles de desigualdad interna en los resultados" 
-                    "académicos de las Pruebas Saber 11?"),
+                    "académicos de las Pruebas Saber 11?",
+                    style={"marginBottom": "15px"}),
             html.Li("¿Cómo varía el desempeño académico de los estudiantes según el nivel educativo del padre en comparación"
-                     " con el nivel educativo de la madre?"),
+                     " con el nivel educativo de la madre?",
+                     style={"marginBottom": "15px"}),
             html.Li("¿Qué combinación de características sociodemográficas "
-                    " presenta la mayor concentración de estudiantes en el nivel bajo de desempeño?")])
+                    " presenta la mayor concentración de estudiantes en el nivel bajo de desempeño?",
+                    style={"marginBottom": "15px"})])
     ])
 
 #Tab 1 - Pregunta 1
 tab_p1 = html.Div(
     style = {"fontFamily": "Arial", "padding": "20px"},
     children=[
-        html.H2("Brechas internas en el desempeño académico por ciudad en el Cauca", style={'marginTop': '40px'}),
+        html.H2("Brechas internas en el desempeño académico por ciudad en el Cauca", 
+                style={'marginTop': '40px',"color": "#1A3980", 'textAlign': 'center'}),
         
-        dcc.Graph(figure=fig_p1_1, style={'width': '100%', 'height': '700px', 'marginBottom': '100px', "maxWidth": "800px"}),
-        dcc.Graph(figure=fig_p1_2, style={'width': '100%', 'height': '600px', 'marginBottom': '100px', "maxWidth": "600px"}),
-        
-        html.H3("Factores asociados al coeficiente de variación", style={'textAlign': 'center', 'marginTop': '30px'}),
-        tabla_modelos])
+        #Hallazgos y conclusiones de la pregunta 1
+        html.Div(
+            style={
+                "maxWidth": "900px",
+                "margin": "30px auto",
+                "lineHeight": "1.6"},
+            children=[
+                html.Span(
+                    "Hallazgos: ",
+                    style={
+                        "fontWeight": "bold",
+                        "fontSize": "18px",
+                        "color": "#1A3980"}
+                ),
+                html.Span(
+                    "Se identifican municipios con alta dispersión en los puntajes, lo que evidencia "
+                    "brechas internas significativas en el desempeño académico. Estas diferencias "
+                    "sugieren desigualdades estructurales dentro de ciertos territorios que requieren "
+                    "intervenciones focalizadas."),],),
 
+        #Graficas y tabla de la pregunta 1
+        html.Div(
+            style={
+                "display": "flex",
+                "justifyContent": "center",
+                "gap": "30px",
+                "flexWrap": "wrap",     # si la pantalla es pequeña, se apilan
+                "marginTop": "20px",
+                "marginBottom": "50px",
+            },
+            children=[
+                #Figura1
+                html.Div(
+                    style={"flex": "1", "minWidth": "420px", "maxWidth": "800px"},
+                    children=[
+                        dcc.Graph(
+                            figure=fig_p1_1,
+                            responsive=True,
+                            style={"height": "600px"},),],),
+                #Figura2
+                html.Div(
+                    style={"flex": "1", "minWidth": "420px", "maxWidth": "700px"},
+                    children=[
+                        dcc.Graph(
+                            figure=fig_p1_2,
+                            responsive=True,
+                            style={"height": "600px"},)],),
+
+            ],),
+        html.H3("Factores asociados al coeficiente de variación", style={'textAlign': 'center', 'marginTop': '30px', "color": "#1A3980"}),
+            
+
+        html.Div(
+            style={
+                "maxWidth": "900px",
+                "margin": "20px auto 80px auto"},
+            children= tabla_modelos),
+    ]
+)
+        
 #Tab 2 - Pregunta 2
 tab_p2 = html.Div(
     style = {"fontFamily": "Arial", "padding": "20px"},
     children=[
-        html.H2("Impacto individual y conjunto del nivel educativo parental en el desempeño académico", style={'marginTop': '40px'}),
+        html.H2("Impacto individual y conjunto del nivel educativo parental en el desempeño académico", 
+                style={'marginTop': '40px',"color": "#1A3980", 'textAlign': 'center'}),
         
-        html.H4("Nivel educativo del padre", style={'textAlign': 'center'}),
-        tabla_p2_padre,
+        #Hallazgos y conclusiones de la pregunta 2
+        html.Div(
+            style={
+                "maxWidth": "900px",
+                "margin": "30px auto",
+                "lineHeight": "1.6"},
+            children=[
+                html.Span(
+                    "Hallazgos: ",
+                    style={
+                        "fontWeight": "bold",
+                        "fontSize": "18px",
+                        "color": "#1A3980"}
+                ),
+                html.Span(
+                    "Algun hallazgo que me inventare"),],),
+
+        #Tablas de la pregunta 2
+        html.Div(
+            style={
+                "display": "flex",
+                "gap": "30px",
+                "justifyContent": "center",
+                "alignItems": "flex-start",
+                "flexWrap": "wrap",  
+                "marginTop": "20px"},
+
+            children=[
+                html.Div(
+                    style={"flex": "1", "minWidth": "350px", "maxWidth": "500px"},
+                    children=[
+                        html.H4("Nivel educativo del padre", style={"textAlign": "center"}),
+                        tabla_p2_padre,],),
+                html.Div(
+                    style={"flex": "1", "minWidth": "350px", "maxWidth": "500px"},
+                    children=[
+                        html.H4("Nivel educativo de la madre", style={"textAlign": "center"}),
+                        tabla_p2_madre,],),],),
         
-        html.H4("Nivel educativo de la madre", style={'textAlign': 'center', 'marginTop': '30px'}),
-        tabla_p2_madre,
-        
-        dcc.Graph(figure=fig_p2_3, style={'width': '100%', 'height': 'auto', 'marginBottom': '20px', "maxWidth": "800px"}),
-        dcc.Graph(figure=fig_p2_4, style={'width': '100%', 'height': 'auto', 'marginBottom': '20px', "maxWidth": "800px"})])
+        #Gráficass de la pregunta 2
+        html.Div(
+            style={
+                "marginTop": "30px",
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+                },
+
+            children=[
+                html.Div(
+                    style={"width": "100%", "maxWidth": "800px", "marginBottom": "30px"},
+                    children=[
+                        dcc.Graph(
+                            figure=fig_p2_3,
+                            style={"width": "100%", "height": "580px"},
+                            config={"displayModeBar": False},),],),
+                     
+                html.Div(
+                    style={"width": "100%", "maxWidth": "800px", "marginTop": "30px"},
+                    children=[
+                        dcc.Graph(
+                            figure=fig_p2_4,
+                            style={"width": "100%", "height": "500px"},
+                            config={"displayModeBar": False},),],),],),
+
+    ],
+),
         
 #Pregunta 3
 tab_p3 = html.Div(

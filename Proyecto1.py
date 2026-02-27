@@ -189,7 +189,14 @@ def analisis_regresion(desigualdad):
             "R²": round(float(modelo.rsquared), 4),
             "p-value": round(float(modelo.pvalues[var]), 4),})
         
+    mapeo = {
+    "prop_rural": "Proporción rural",
+    "desv_estrato": "Desviación del estrato",
+    "cantidad": "Cantidad de estudiantes",
+    "promedio": "Promedio del puntaje"}
+
     df_modelos = pd.DataFrame(resultados).sort_values("R²", ascending=False)
+    df_modelos["Variable"] = df_modelos["Variable"].map(mapeo)
 
     tabla_modelos = dash_table.DataTable(
         data=df_modelos.to_dict("records"),
@@ -197,6 +204,7 @@ def analisis_regresion(desigualdad):
         sort_action="native",
         style_table={"overflowX": "auto"},
         style_cell={"textAlign": "center", "padding": "6px"})
+
     return tabla_modelos
 
 def pregunta1(df, desigualdad):
