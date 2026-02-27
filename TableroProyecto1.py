@@ -31,30 +31,36 @@ tab_portada = html.Div(#abre1
         #Título y descripción
         html.H1("Análisis sobre la desigualdad educativa en Cauca", style={'textAlign': 'center', "color" :"#1A3980"}),
         
-        html.Div(#abre2
+        html.Div(
             style={
                 "display": "flex",
-                "gap": "30px",
                 "alignItems": "center",
                 "justifyContent": "center",
-                "marginTop": "20px",
+                "gap": "40px",
+                "marginTop": "30px",
+                "flexWrap": "wrap",
             },
-            children=[#abre3
+            
+            children=[
+
                 html.Div(
-                    style={"maxWidth": "650px", "textAlign": "justify"},
+                    style ={"maxWidth": "700px",
+                            "textAlign": "justify",
+                            "lineHeight": "1.6",},
                     children=[
                         html.P(
-                            "Se realizó un análisis de la desigualdad educativa en el departamento del Cauca "
-                            "a partir de los resultados de las Pruebas Saber 11, con el propósito de identificar " 
-                            "las diferencias en el acceso a la educación según diferentes variables socioeconómicas y geográficas.",
-                            style={"textAlign": "justify"}),
-                        html.Br(),
-                        html.Br(),
-                        "Con base en este "
-                        "análisis, se diseñó una herramienta de analítica orientada a apoyar a la Secretaría de Educación "
-                        "del Cauca en la toma de decisiones informadas y en la implementación de estrategias focalizadas "
-                        "para reducir la desigualdad educativa en el departamento"],),
-
+                            "Se realizó un análisis de la desigualdad educativa en el departamento del Cauca a partir de los "
+                            "resultados de las Pruebas Saber 11, con el propósito de identificar las diferencias en el acceso "
+                            "a la educación según diferentes variables socioeconómicas y geográficas.",
+                            style={"marginBottom": "18px"}),
+                        html.P(
+                            "Con base en este análisis, se diseñó una herramienta de analítica orientada a apoyar a la Secretaría "
+                            "de Educación del Cauca en la toma de decisiones informadas y en la implementación de estrategias " 
+                            "focalizadas para reducir la desigualdad educativa en el departamento.",
+                            style={"marginTop": "0px"}),
+                    ],
+                ),
+            
                 html.Img(
                     src="/assets/foto_icfes.png",
                     style={
