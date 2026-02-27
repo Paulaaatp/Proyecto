@@ -169,10 +169,15 @@ tab_p2 = html.Div(
                     style={
                         "fontWeight": "bold",
                         "fontSize": "18px",
-                        "color": "#1A3980"}
+                        "color": "#1A3980",
+                        "textAlign" : 'justify'}
                 ),
                 html.Span(
-                    "Algun hallazgo que me inventare"),],),
+                    "Se observa un gradiente educativo consistente en el desempeño académico:" 
+                    " a mayor nivel educativo de los padres, mayor es el puntaje global promedio. " 
+                    "Además, cuando ambos padres presentan niveles educativos altos, el efecto es " 
+                    "acumulativo y potencia los resultados, lo que evidencia una fuerte asociación " 
+                    "entre el capital educativo del hogar y el rendimiento académico."),],),
 
         #Tablas de la pregunta 2
         html.Div(
@@ -215,12 +220,12 @@ tab_p2 = html.Div(
                             config={"displayModeBar": False},),],),
                      
                 html.Div(
-                    style={"width": "100%", "maxWidth": "800px", "marginTop": "30px"},
+                    style={"width": "100%", "maxWidth": "800px", "marginTop": "30px", "margin": "20px auto 80px auto"},
                     children=[
                         dcc.Graph(
                             figure=fig_p2_4,
                             style={"width": "100%", "height": "500px"},
-                            config={"displayModeBar": False},),],),],),
+                            config={"displayModeBar": False},),],),],),                 
 
     ],
 ),
@@ -229,16 +234,85 @@ tab_p2 = html.Div(
 tab_p3 = html.Div(
     style = {"fontFamily": "Arial", "padding": "20px"},
     children=[
-        html.H2("Concentración del bajo desempeño académico según estrato, zona y bienes del hogar", style={'marginTop': '40px'}),
+        html.H2("Concentración del bajo desempeño académico según estrato, zona y bienes del hogar", 
+                style={'marginTop': '40px',"color": "#1A3980", 'textAlign': 'center'}),
         
-        dcc.Graph(figure=fig_p3_1, style={'width': '100%', 'height': 'auto', 'marginBottom': '20px', "maxWidth": "400px"}),
-        dcc.Graph(figure=fig_p3_2, style={'width': '100%', 'height': 'auto', 'marginBottom': '20px', "maxWidth": "400px"}),
-        dcc.Graph(figure=fig_p3_3, style={'width': '100%', 'height': 'auto', 'marginBottom': '20px', "maxWidth": "400px"})])
+        #Hallazgos y conclusiones de la pregunta 2
+        html.Div(
+            style={
+                "maxWidth": "900px",
+                "margin": "30px auto",
+                "lineHeight": "1.6"},
+            children=[
+                html.Span(
+                    "Hallazgos: ",
+                    style={
+                        "fontWeight": "bold",
+                        "fontSize": "18px",
+                        "color": "#1A3980",
+                        "textAlign" : 'justify'}),
+                html.Span(
+                    "Se evidencia una brecha socioeconómica marcada en el desempeño: " 
+                    "la proporción de estudiantes en nivel bajo es significativamente " 
+                    "mayor en estratos bajos, en zona rural y en hogares con menor " 
+                    "dotación de bienes. La gráfica de brecha refuerza esta desigualdad " 
+                    "al mostrar que, a medida que aumentan el estrato y los bienes del " 
+                    "hogar (y se pasa a zona urbana), la distancia en puntaje y/o en " 
+                    "probabilidad de bajo desempeño se amplía a favor de los grupos más " 
+                    "favorecidos, lo que sugiere condiciones estructurales que requieren " 
+                    "intervenciones focalizadas en los perfiles más vulnerables.", 
+                    style= {"textAlign" : "justify: "}),],),
+        
+        #Graficas de la pregunta 3
+        html.Div(
+            style={
+                "display": "flex",
+                "gap": "30px",
+                "justifyContent": "center",
+                "alignItems": "stretch",
+                "flexWrap": "wrap",
+                "marginTop": "30px"},
 
+            children=[
+
+                html.Div(
+                    style={"flex": "1", "minWidth": "350px", "maxWidth": "600px"},
+                    children=[
+                        dcc.Graph(
+                            figure=fig_p3_1,
+                            style={"width": "100%", "height": "500px"},
+                            config={"displayModeBar": False},),],),
+    
+                html.Div(
+                    style={"flex": "1", "minWidth": "350px", "maxWidth": "600px"},
+                    children=[
+                        dcc.Graph(
+                            figure=fig_p3_2,
+                            style={"width": "100%", "height": "500px"},
+                            config={"displayModeBar": False},),],),
+
+            ],),
+        
+            html.Div(
+                style={
+                    "marginTop": "40px",
+                    "display": "flex",
+                    "justifyContent": "center"},
+                children=[
+                    html.Div(
+                        style={"width": "100%", "maxWidth": "800px"},
+                        children=[
+                        dcc.Graph(
+                            figure=fig_p3_3,  
+                            style={"width": "100%", "height": "550px"},
+                            config={"displayModeBar": False},),],)
+                ],)
+    ],)
+ 
+               
 app.layout = html.Div(
     children=[
         header,
-
         dcc.Tabs(
             value="tab-portada",
             children=[

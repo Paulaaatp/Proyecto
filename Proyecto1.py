@@ -275,7 +275,12 @@ def pregunta2(df, orden_educativo):
     # Visualización padre
     tabla_padre_dash = dash_table.DataTable(
         data=tabla_padre.to_dict("records"),
-        columns=[{"name": c, "id": c} for c in tabla_padre.columns],
+        columns=[
+            {"name": "Nivel educativo", "id": "fami_educacionpadre"},
+            {"name": "Cantidad de estudiantes", "id": "n_estudiantes"},
+            {"name": "Promedio del puntaje", "id": "media"},
+            {"name": "Desviación estándar", "id": "desviacion"}
+        ],
         page_size=10,
         sort_action="native",
         filter_action="native",
@@ -290,7 +295,12 @@ def pregunta2(df, orden_educativo):
     # Visualización madre
     tabla_madre_dash = dash_table.DataTable(
         data=tabla_madre.to_dict("records"),
-        columns=[{"name": c, "id": c} for c in tabla_madre.columns],
+        columns=[
+            {"name": "Nivel educativo", "id": "fami_educacionmadre"},
+            {"name": "Cantidad de estudiantes", "id": "n_estudiantes"},
+            {"name": "Promedio del puntaje", "id": "media"},
+            {"name": "Desviación estándar", "id": "desviacion"}
+        ],        
         page_size=10,
         sort_action="native",
         filter_action="native",
@@ -356,11 +366,13 @@ def pregunta2(df, orden_educativo):
     fig_p2_4 = px.imshow(
         df_matriz_filtrada,
         aspect="auto",
-        title="Puntaje promedio según combinación educativa Padre × Madre (solo combinaciones con ≥ 30 estudiantes)",
+        title="Puntaje promedio según combinación educativa Padre × Madre <br> (solo combinaciones con ≥ 30 estudiantes)",
         labels={"color": "Puntaje Global Promedio"})
 
     fig_p2_4.update_layout(
-        xaxis_tickangle=45)
+        xaxis_tickangle=45, 
+        xaxis_title="Nivel educativo de la madre", 
+        yaxis_title="Nivel educativo del padre")
 
     return tabla_padre_dash, tabla_madre_dash, fig_p2_3, fig_p2_4
 
